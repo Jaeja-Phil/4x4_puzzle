@@ -1,5 +1,68 @@
 const randomNumbers = randomNumberGenrator();
-const random4x4 = random4x4Generator(randomNumbers);
+let random4x4 = random4x4Generator(randomNumbers);
+
+function swapTilesDOM(curTile, changeTile) {
+  let temp = curTile.textContent;
+  curTile.textContent = changeTile.textContent;
+  changeTile.textContent = temp;
+}
+
+function swapTilesArray(direction, indexOfZero) {
+  if (direction === "left") {
+    [
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+      random4x4[indexOfZero[0]][indexOfZero[1] + 1],
+    ] = [
+      random4x4[indexOfZero[0]][indexOfZero[1] + 1],
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+    ];
+  }
+  if (direction === "up") {
+    [
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+      random4x4[indexOfZero[0] + 1][indexOfZero[1]],
+    ] = [
+      random4x4[indexOfZero[0] + 1][indexOfZero[1]],
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+    ];
+  }
+  if (direction === "right") {
+    [
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+      random4x4[indexOfZero[0]][indexOfZero[1] - 1],
+    ] = [
+      random4x4[indexOfZero[0]][indexOfZero[1] - 1],
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+    ];
+  }
+  if (direction === "down") {
+    [
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+      random4x4[indexOfZero[0] - 1][indexOfZero[1]],
+    ] = [
+      random4x4[indexOfZero[0] - 1][indexOfZero[1]],
+      random4x4[indexOfZero[0]][indexOfZero[1]],
+    ];
+  }
+}
+
+function isDone() {
+  let answerArray = [
+    [1, 2, 3, 4],
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, 0],
+  ];
+  let result = true;
+  answerArray.forEach((el, idx) => {
+    el.forEach((innerEl, innerIdx) => {
+      if (random4x4[idx][innerIdx] !== answerArray[idx][innerIdx]) {
+        result = false;
+      }
+    });
+  });
+  return result;
+}
 
 function moveTile(e) {
   let indexOfZero = findZero();
@@ -14,11 +77,8 @@ function moveTile(e) {
     let currentTile = document.getElementById(
       `${indexOfZero[0]}-${indexOfZero[1]}`
     );
-    let temp = currentTile.textContent;
-    currentTile.textContent = rightTile.textContent;
-    rightTile.textContent = temp;
-
-    return document.body.addEventListener("keydown", moveTile);
+    swapTilesDOM(currentTile, rightTile);
+    swapTilesArray("left", indexOfZero);
   }
   // up
   if (e.keyCode === 38) {
@@ -31,30 +91,42 @@ function moveTile(e) {
     let currentTile = document.getElementById(
       `${indexOfZero[0]}-${indexOfZero[1]}`
     );
-    let temp = currentTile.textContent;
-    currentTile.textContent = belowTile.textContent;
-    belowTile.textContent = temp;
-    return;
+    swapTilesDOM(currentTile, belowTile);
+    swapTilesArray("up", indexOfZero);
   }
   // right
   if (e.keyCode === 39) {
     if (indexOfZero[1] === 0) {
       return console.log("no tile on the left!");
     }
-    let rightTile = document.getElementById(
-      `${indexOfZero[0]}-${indexOfZero[1] + 1}`
+    let leftTile = document.getElementById(
+      `${indexOfZero[0]}-${indexOfZero[1] - 1}`
     );
+    let currentTile = document.getElementById(
+      `${indexOfZero[0]}-${indexOfZero[1]}`
+    );
+    swapTilesDOM(currentTile, leftTile);
+    swapTilesArray("right", indexOfZero);
   }
   // down
   if (e.keyCode === 40) {
     if (indexOfZero[0] === 0) {
       return console.log("no tile above");
     }
-    let downTile = document.getElementById(
-      `${indexOfZero[0] + 1}-${indexOfZero[1]}`
+    let upTile = document.getElementById(
+      `${indexOfZero[0] - 1}-${indexOfZero[1]}`
     );
+    let currentTile = document.getElementById(
+      `${indexOfZero[0]}-${indexOfZero[1]}`
+    );
+    swapTilesDOM(currentTile, upTile);
+    swapTilesArray("down", indexOfZero);
   }
-  return;
+  // check if the game is done
+  if (isDone()) {
+    alert("Congratulations, you won!");
+    document.body.removeEventListener("keydown", moveTile);
+  }
 }
 
 function randomNumberGenrator() {
